@@ -24,6 +24,7 @@ vorpal.command('show [regions...]', 'Generates time overlap table')
       return (region.includes(ALIAS_SPLITTER)) ? region.split(ALIAS_SPLITTER) : [region, region]
     })
 
+    const localNow = DateTime.local()
     const regions = pairs.map(pair => pair[0])
     const aliases = pairs.map(pair => pair[1])
 
@@ -46,16 +47,18 @@ vorpal.command('show [regions...]', 'Generates time overlap table')
       if (time.hour > NIGHT_TIME_START || time.hour < NIGHT_TIME_END) {
         return chalk.grey.bgBlack(displayString)
       }
-      return chalk.black.bgYellow(displayString)
+      return chalk.black.bgGreen(displayString)
     }
 
     for (let hour = 0; hour < 24; hour++) {
       const row = []
       regions.forEach(region => {
-        row.push(formatTime(getRegionsTime(region).plus({
+        const regionTime = getRegionsTime(region)
+        const offset = regionTime.offset
+        row.push(formatTime(regionTime.plus({
           hours: hour
         }).set({
-          minutes: 0
+          minutes: offset % 60
         })))
       })
       table.push(row)
